@@ -1,0 +1,3 @@
+name:    topoi
+depend:  agda-prelude
+include: src
