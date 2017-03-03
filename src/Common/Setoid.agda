@@ -7,8 +7,6 @@ open import Prelude as P
     ; sym
     ; trans
     ; transport₂
-    ; cong
-    ; cong₂
     )
 
 abs-syntax : ∀ {a b} {A : Set a} {B : A → Set b}
@@ -71,9 +69,9 @@ infix 4 Natl′
 syntax Natl′ B R f g = f ∼[ B ∣ R ]′ g
 -}
 
-foo : ∀ {a b c} {A : Set a} (B : A → Set b) (C : ∀ x → B x → Set c)
-    → Set {!!}
-foo B C = Natl (λ x → C x {!!}) (λ x → {!Natl!}) {!!} {!!}
+-- foo : ∀ {a b c} {A : Set a} (B : A → Set b) (C : ∀ x → B x → Set c)
+--     → Set {!!}
+-- foo B C = Natl (λ x → C x {!!}) (λ x → {!Natl!}) {!!} {!!}
 
 {-
 record [_]IndexedSetoid {a b c} {A : Set a} (A-setoid : Setoid b A) d (C : A → Set c) : Set {!!} where
@@ -130,22 +128,6 @@ ind≡ : ∀ {a c} {A : Set a} (C : (x y : A) → x ≡ y → Set c)
 ind≡ C c P.refl = c _
 infixl 1 ind≡
 syntax ind≡ C (λ x → e) = x ←[ C ] e
-
-cong : ∀ {a b} {A : Set a} {B : A → Set b}
-     → (f : ∀ x → B x)
-     → {x y : A} (p : x ≡ y)
-     → p · f x [ y / x ] ≡ f y
-cong f P.refl = P.refl
-infixr 5 cong
-syntax cong f p = f $$≡ p
-
-cong′ : ∀ {a b} {A : Set a} {B : Set b}
-      → (f : A → B)
-      → {x y : A} (p : x ≡ y)
-      → f x ≡ f y
-cong′ f {x} {y} p = p · P.refl ∈ f x ≡ f ∙ [ y / ∙ ]
-infixr 5 cong′
-syntax cong′ f p = f $≡ p
 
 bind≡ : ∀ {a c} {A : Set a} (C : (x y : A) → x ≡ y → Set c)
       → {x y : A}
@@ -216,3 +198,31 @@ transport-const : ∀ {a b} {A : Set a} {B : Set b} {z : B}
 transport-const {B = B} {z} =
   x ←[ _ ∣ _ ∣ p ∣ transport (λ _ → B) p z ≡ z ]
   P.refl
+
+transport-sym : ∀ {a b} {A : Set a} (B : A → Set b)
+              → {x y : A} (p : x ≡ y)
+              → {u : B y} {v : B x} (q : transport B p v ≡ u)
+              → transport B (P.sym p) u ≡ v
+transport-sym B =
+  x ←[ x ∣ y ∣ p ∣
+     ( {u : B y} {v : B x} (q : transport B p v ≡ u)
+     → transport B (P.sym p) u ≡ v
+     )]
+  q  ∣ P.sym q
+
+transport-trans : ∀ {a b} {A : Set a} (B : A → Set b)
+                → {x y : A} (p : x ≡ y)
+                → {z : A} (q : y ≡ z)
+                → {u : B x} {w : B z} (r : transport B q (transport B p u) ≡ w)
+                → transport B (P.trans p q) u ≡ w
+transport-trans {A = A} B =
+  x ←[ x ∣ y ∣ p ∣
+     ( {z : A} (q : y ≡ z)
+     → {u : B x} {w : B z} (r : transport B q (transport B p u) ≡ w)
+     → transport B (P.trans p q) u ≡ w
+     )]
+  x ←[ x ∣ z ∣ q ∣
+     ( {u : B x} {w : B z} (r : transport B q u ≡ w)
+     → transport B q u ≡ w
+     )]
+  r  ∣ r

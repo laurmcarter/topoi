@@ -10,6 +10,7 @@ open import Prelude as P public
     ; refl
     ; sym
     ; trans
+    ; transport₂
     )
 
 open import Common.Setoid public
@@ -198,9 +199,9 @@ FAM a b = record
     { _∼_   = λ f g →
       Σ (∀ x → fst f x ≡ fst g x) λ p →
       ∀ x y → transport (snd b) (p x) (snd f x y) ≡ snd g x y
-    ; refl  = (λ x → {!refl!}) , {!CAT-syntax._∼_!}
-    ; sym   = {!!}
-    ; trans = {!!}
+    ; refl  = (λ x → P.refl) , (λ x y → P.refl)
+    ; sym   = λ p → (λ x → P.sym (fst p x)) , (λ x y → transport-sym (snd b) (fst p x) (snd p x y))
+    ; trans = λ p q → (λ x → P.trans (fst p x) (fst q x)) , (λ x y → transport-trans (snd b) (fst p x) (fst q x) {!!})
     }
   ; id  = {!!}
   ; _∘_ = {!!}
@@ -210,6 +211,7 @@ FAM a b = record
   ; ∘∼  = {!!}
   }
 
+{-
 FAM[_] : ∀ {o1 m1 e1} (C : Cat o1 m1 e1) o2 m2 e2 → Cat _ _ _
 FAM[ C ] o2 m2 e2 = record
   { Obj =
@@ -228,6 +230,7 @@ FAM[ C ] o2 m2 e2 = record
   }
   where
   open CAT-syntax
+-}
 
 SetoidObj : ∀ a b → Set (lsuc (a ⊔ b))
 SetoidObj a b = Σ (Set a) (Setoid b)
